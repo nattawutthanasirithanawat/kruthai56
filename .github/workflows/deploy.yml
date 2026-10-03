@@ -2,8 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ['main', 'master']
-  workflow_dispatch:
+    branches: ['main'] # หรือ master ถ้า branch หลักคุณชื่อ master
 
 permissions:
   contents: read
@@ -11,7 +10,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -36,10 +35,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Upload Artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: './dist' # <--- หัวใจสำคัญอยู่ตรงนี้ครับ บอกให้หยิบโฟลเดอร์ dist ไปใช้
 
       - name: Deploy to GitHub Pages
         id: deployment
