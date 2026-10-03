@@ -26,7 +26,7 @@ export const PDFViewerModal: React.FC<PDFViewerModalProps> = ({ certificate, onC
                 ตัวอย่างเกียรติบัตร: {certificate.name}
               </h3>
               <p className="text-xs text-purple-200">
-                รหัสนักศึกษา: {certificate.studentId || '-'} · {certificate.projectName}
+                เลขที่: {certificate.studentId || '-'} · {certificate.projectName}
               </p>
             </div>
           </div>

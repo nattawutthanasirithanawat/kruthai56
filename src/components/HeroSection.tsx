@@ -4,13 +4,13 @@ import { APP_LOGO_URL, DEVELOPER_CREDIT } from '../constants/assets';
 
 interface HeroSectionProps {
   onScrollToSearch: () => void;
-  onScrollToCorrection?: () => void;
+  onOpenCorrection?: () => void;
   totalRecords: number;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onScrollToSearch,
-  onScrollToCorrection,
+  onOpenCorrection,
   totalRecords,
 }) => {
   const [imgError, setImgError] = useState(false);
@@ -56,7 +56,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </h1>
           <p className="text-sm sm:text-base text-purple-200 max-w-2xl mx-auto font-sarabun leading-relaxed">
             ค้นหาและดาวน์โหลดเกียรติบัตรอิเล็กทรอนิกส์ (PDF)
-            โดยเลือกโครงการและค้นหาด้วยรหัสนักศึกษา หรือชื่อ-นามสกุล
+            โดยเลือกโครงการและค้นหาด้วยชื่อ-นามสกุลผู้รับเกียรติบัตร
           </p>
         </div>
 
@@ -70,12 +70,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <span>ค้นหาเกียรติบัตรของท่าน</span>
           </button>
 
-          {onScrollToCorrection && (
+          {onOpenCorrection && (
             <button
-              onClick={onScrollToCorrection}
+              onClick={onOpenCorrection}
               className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium text-purple-100 bg-purple-900/80 hover:bg-purple-800 hover:text-white border border-purple-700/80 rounded-xl transition-colors backdrop-blur-sm font-prompt"
             >
-              <span>ยื่นคำร้องขอแก้ไขข้อมูล</span>
+              <span>บริการยื่นคำร้องออนไลน์</span>
             </button>
           )}
         </div>

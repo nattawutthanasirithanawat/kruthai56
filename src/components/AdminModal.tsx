@@ -430,7 +430,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                         <tr>
                           <th className="py-2.5 px-3 font-semibold">เลขคำร้อง</th>
                           <th className="py-2.5 px-3 font-semibold">โครงการ</th>
-                          <th className="py-2.5 px-3 font-semibold">รหัส นศ.</th>
+                          <th className="py-2.5 px-3 font-semibold">เลขที่</th>
                           <th className="py-2.5 px-3 font-semibold">ชื่อเดิม ➔ ชื่อที่ถูกต้อง</th>
                           <th className="py-2.5 px-3 font-semibold">สถานะคำร้อง</th>
                           <th className="py-2.5 px-3 font-semibold text-right">การจัดการ</th>
@@ -558,7 +558,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                       <thead className="bg-purple-50 text-purple-950 font-prompt sticky top-0 border-b border-purple-200">
                         <tr>
                           <th className="py-2.5 px-3 font-semibold">โครงการ</th>
-                          <th className="py-2.5 px-3 font-semibold">รหัสนักศึกษา</th>
+                          <th className="py-2.5 px-3 font-semibold">เลขที่</th>
                           <th className="py-2.5 px-3 font-semibold">ชื่อ-นามสกุล</th>
                           <th className="py-2.5 px-3 font-semibold">ลิงก์ PDF</th>
                           <th className="py-2.5 px-3 font-semibold text-right">การจัดการ</th>
@@ -656,7 +656,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
                 <div className="space-y-1">
                   <label className="font-semibold text-stone-700 font-prompt">
-                    ๒. รหัสนักศึกษา
+                    ๒. เลขที่
                   </label>
                   <input
                     type="text"

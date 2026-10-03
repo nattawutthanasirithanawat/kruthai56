@@ -37,10 +37,10 @@ export const GuideModal: React.FC<GuideModalProps> = ({ onClose }) => {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-stone-900 font-prompt text-sm">
-                เลือกโครงการและวิธีการค้นหา
+                เลือกโครงการและค้นหาด้วยชื่อ-นามสกุล
               </h3>
               <p className="leading-relaxed text-stone-600">
-                เลือกโครงการที่ท่านเข้าร่วม จากนั้นกดเลือกสลับวิธีค้นหาว่าจะค้นหาด้วย <strong>"รหัสนักศึกษา"</strong> หรือ <strong>"ชื่อ-นามสกุล"</strong>
+                เลือกโครงการที่ท่านเข้าร่วม จากนั้นระบุชื่อ หรือ นามสกุล เพื่อค้นหาและแสดงเกียรติบัตรของท่าน
               </p>
             </div>
           </div>

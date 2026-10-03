@@ -11,7 +11,7 @@ import { PDFViewerModal } from './components/PDFViewerModal';
 import { AdminModal } from './components/AdminModal';
 import { GuideModal } from './components/GuideModal';
 import { ActivitiesShowcase } from './components/ActivitiesShowcase';
-import { CorrectionRequestSection } from './components/CorrectionRequestSection';
+import { CorrectionRequestPage } from './components/CorrectionRequestPage';
 import { Footer } from './components/Footer';
 
 export default function App() {
@@ -20,6 +20,9 @@ export default function App() {
   const [activePdfCert, setActivePdfCert] = useState<CertificateRecord | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+
+  // Active Menu Page: 'home' (ค้นหาเกียรติบัตร) | 'requests' (บริการยื่นคำร้องออนไลน์)
+  const [currentPage, setCurrentPage] = useState<'home' | 'requests'>('home');
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
@@ -43,16 +46,15 @@ export default function App() {
   };
 
   const handleScrollToSearch = () => {
-    const el = document.getElementById('search-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleScrollToCorrection = () => {
-    const el = document.getElementById('correction-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
+    if (currentPage !== 'home') {
+      setCurrentPage('home');
+      setTimeout(() => {
+        const el = document.getElementById('search-section');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      const el = document.getElementById('search-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -78,8 +80,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#faf7fc] text-stone-800 flex flex-col selection:bg-purple-200 selection:text-purple-950 font-sarabun">
-      {/* Top Bar Header - Admin button is exclusively at top right */}
+      {/* Top Bar Header with Page Switcher (ค้นหาเกียรติบัตร & บริการยื่นคำร้องออนไลน์) */}
       <Header
+        currentPage={currentPage}
+        onNavigate={(page) => {
+          setCurrentPage(page);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
         onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
         totalRecords={certificates.length}
@@ -87,42 +94,56 @@ export default function App() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6">
-        {/* Hero Section */}
-        <HeroSection
-          onScrollToSearch={handleScrollToSearch}
-          onScrollToCorrection={handleScrollToCorrection}
-          totalRecords={certificates.length}
-        />
+        {/* PAGE 1: HOME & CERTIFICATE SEARCH */}
+        {currentPage === 'home' && (
+          <div className="space-y-8 animate-in fade-in duration-200">
+            {/* Hero Section */}
+            <HeroSection
+              onScrollToSearch={handleScrollToSearch}
+              onOpenCorrection={() => {
+                setCurrentPage('requests');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              totalRecords={certificates.length}
+            />
 
-        {/* Certificate Search & Results */}
-        <section id="search-section" className="scroll-mt-20">
-          <div className="mb-4">
-            <h2 className="text-xl sm:text-2xl font-bold font-prompt text-purple-950">
-              ค้นหาและดาวน์โหลดเกียรติบัตร
-            </h2>
-            <p className="text-xs sm:text-sm text-stone-500 font-sarabun mt-0.5">
-              เลือกโครงการ และเลือกค้นหาด้วยรหัสนักศึกษา หรือชื่อ-นามสกุล
-            </p>
+            {/* Certificate Search & Results (Exclusively by Name, displaying เลขที่) */}
+            <section id="search-section" className="scroll-mt-20">
+              <div className="mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold font-prompt text-purple-950">
+                  ค้นหาและดาวน์โหลดเกียรติบัตร
+                </h2>
+                <p className="text-xs sm:text-sm text-stone-500 font-sarabun mt-0.5">
+                  เลือกโครงการ และกรอกชื่อ-นามสกุลเพื่อค้นหาและดาวน์โหลดเกียรติบัตร
+                </p>
+              </div>
+
+              <SearchCertificate
+                certificates={certificates}
+                onOpenPdfViewer={(cert) => setActivePdfCert(cert)}
+                isLoading={isLoading}
+              />
+            </section>
+
+            {/* Projects Showcase */}
+            <ActivitiesShowcase
+              certificates={certificates}
+              onSelectProject={handleSelectProjectFromShowcase}
+            />
           </div>
+        )}
 
-          <SearchCertificate
-            certificates={certificates}
-            onOpenPdfViewer={(cert) => setActivePdfCert(cert)}
-            isLoading={isLoading}
+        {/* PAGE 2: DEDICATED ONLINE CORRECTION & TRACKING SERVICE (Requirement 3) */}
+        {currentPage === 'requests' && (
+          <CorrectionRequestPage
+            availableProjects={availableProjects}
+            onBackToHome={() => {
+              setCurrentPage('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            onRequestSubmitted={handleRefresh}
           />
-        </section>
-
-        {/* Projects Showcase */}
-        <ActivitiesShowcase
-          certificates={certificates}
-          onSelectProject={handleSelectProjectFromShowcase}
-        />
-
-        {/* Certificate Correction Request System at the bottom */}
-        <CorrectionRequestSection
-          availableProjects={availableProjects}
-          onRequestSubmitted={handleRefresh}
-        />
+        )}
       </main>
 
       {/* Footer */}
