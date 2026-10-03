@@ -1,54 +1,46 @@
 @import "tailwindcss";
 
-/* 1. นำเข้าไฟล์ฟอนต์ LINE Seed Sans TH (ตรวจสอบชื่อไฟล์ให้ตรงกับที่อัปโหลดเป๊ะๆ) */
 @font-face {
   font-family: 'LINE Seed Sans TH';
-  src: url('./assets/LINESeedSansTH_Th.ttf') format('truetype');
+  src: url('/kruthai56/fonts/LINESeedSansTH_Th.ttf') format('truetype');
   font-weight: 300;
-  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'LINE Seed Sans TH';
-  src: url('./assets/LINESeedSansTH_Rg.ttf') format('truetype');
+  src: url('/kruthai56/fonts/LINESeedSansTH_Rg.ttf') format('truetype');
   font-weight: 400;
-  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'LINE Seed Sans TH';
-  src: url('./assets/LINESeedSansTH_Bd.ttf') format('truetype');
+  src: url('/kruthai56/fonts/LINESeedSansTH_Bd.ttf') format('truetype');
   font-weight: 700;
-  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'LINE Seed Sans TH';
-  src: url('./assets/LINESeedSansTH_XBd.ttf') format('truetype');
+  src: url('/kruthai56/fonts/LINESeedSansTH_XBd.ttf') format('truetype');
   font-weight: 800;
-  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
   font-family: 'LINE Seed Sans TH';
-  src: url('./assets/LINESeedSansTH_He.ttf') format('truetype');
+  src: url('/kruthai56/fonts/LINESeedSansTH_He.ttf') format('truetype');
   font-weight: 900;
-  font-style: normal;
   font-display: swap;
 }
 
-/* 2. ตั้งค่าให้ฟอนต์ LINE Seed เป็นฟอนต์เริ่มต้นของทั้งเว็บไซต์ */
 @layer base {
   body {
     font-family: 'LINE Seed Sans TH', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 }
 
-/* 3. อัปเดตคลาสเดิมให้ดึงฟอนต์ใหม่มาใช้ */
 .font-prompt {
   font-family: 'LINE Seed Sans TH', sans-serif;
 }
@@ -61,7 +53,6 @@
   font-family: 'Cinzel', serif;
 }
 
-/* 4. ตั้งค่าหน้ากระดาษสำหรับการพิมพ์เกียรติบัตร */
 @media print {
   body {
     background: white !important;
