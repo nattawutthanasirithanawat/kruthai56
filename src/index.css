@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
-/* 1. นำเข้าไฟล์ฟอนต์ LINE Seed Sans TH แต่ละน้ำหนัก */
+/* 1. นำเข้าไฟล์ฟอนต์ LINE Seed Sans TH (ตรวจสอบชื่อไฟล์ให้ตรงกับที่อัปโหลดเป๊ะๆ) */
 @font-face {
   font-family: 'LINE Seed Sans TH';
   src: url('./assets/LINESeedSansTH_Th.ttf') format('truetype');
-  font-weight: 300; /* Thin (Th) */
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
@@ -12,7 +12,7 @@
 @font-face {
   font-family: 'LINE Seed Sans TH';
   src: url('./assets/LINESeedSansTH_Rg.ttf') format('truetype');
-  font-weight: 400; /* Regular (Rg) */
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
@@ -20,7 +20,7 @@
 @font-face {
   font-family: 'LINE Seed Sans TH';
   src: url('./assets/LINESeedSansTH_Bd.ttf') format('truetype');
-  font-weight: 700; /* Bold (Bd) */
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -28,7 +28,7 @@
 @font-face {
   font-family: 'LINE Seed Sans TH';
   src: url('./assets/LINESeedSansTH_XBd.ttf') format('truetype');
-  font-weight: 800; /* Extra Bold (XBd) */
+  font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
@@ -36,7 +36,7 @@
 @font-face {
   font-family: 'LINE Seed Sans TH';
   src: url('./assets/LINESeedSansTH_He.ttf') format('truetype');
-  font-weight: 900; /* Heavy (He) */
+  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
@@ -48,7 +48,7 @@
   }
 }
 
-/* 3. อัปเดตคลาสเดิมให้ดึงฟอนต์ใหม่มาใช้ (เพื่อไม่ให้โค้ด HTML เดิมพัง) */
+/* 3. อัปเดตคลาสเดิมให้ดึงฟอนต์ใหม่มาใช้ */
 .font-prompt {
   font-family: 'LINE Seed Sans TH', sans-serif;
 }
@@ -57,16 +57,11 @@
   font-family: 'LINE Seed Sans TH', sans-serif;
 }
 
-/* สร้างคลาสชื่อใหม่เผื่อเรียกใช้ในอนาคต */
-.font-lineseed {
-  font-family: 'LINE Seed Sans TH', sans-serif;
-}
-
 .font-cinzel {
-  font-family: 'Cinzel', serif; /* คงไว้เผื่อใช้กับภาษาอังกฤษ */
+  font-family: 'Cinzel', serif;
 }
 
-/* 4. ตั้งค่าหน้ากระดาษสำหรับการพิมพ์เกียรติบัตร (คงเดิม) */
+/* 4. ตั้งค่าหน้ากระดาษสำหรับการพิมพ์เกียรติบัตร */
 @media print {
   body {
     background: white !important;
