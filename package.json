@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "ระบบดาวน์โหลดเกียรติบัตร สาขาวิชาภาษาไทย คณะศึกษาศาสตร์ มหาวิทยาลัยศิลปากร พัฒนาโดย นายณัฐวุฒิ ธนาศิริธนวัชร์ รุ่นที่ 56",
+  "homepage": "https://nattawutthanasirithanawat.github.io/kruthai56",
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
