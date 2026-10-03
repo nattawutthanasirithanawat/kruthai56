@@ -4,12 +4,10 @@ import {
   Lock,
   User,
   KeyRound,
-  Database,
   Plus,
   Edit2,
   Trash2,
   RefreshCw,
-  Check,
   AlertCircle,
   FolderOpen,
   Hash,
@@ -17,33 +15,27 @@ import {
   ExternalLink,
   Layers,
   LogOut,
-  Save,
   Search,
-  Clock,
-  CheckCircle2,
   FileEdit,
   ArrowRight,
+  Database,
 } from 'lucide-react';
 import { CertificateRecord, CorrectionRequest, RequestStatus } from '../types/certificate';
 import { ADMIN_CREDENTIALS } from '../constants/assets';
 import {
-  fetchCertificatesFromSheet,
   getLocalCustomRecords,
   saveLocalCustomRecords,
   getDeletedRecordIds,
   saveDeletedRecordIds,
+  PERMANENT_SHEET_ID,
 } from '../services/googleSheets';
 import {
   getCorrectionRequests,
   updateCorrectionRequestStatus,
-  saveCorrectionRequests,
 } from '../services/requestService';
 
 interface AdminModalProps {
-  currentSheetId: string;
-  currentSheetName: string;
   certificates: CertificateRecord[];
-  onSaveSheetConfig: (sheetId: string, sheetName: string) => void;
   onRefreshData: () => void;
   onClose: () => void;
 }
@@ -56,10 +48,7 @@ const REQUEST_STATUSES: RequestStatus[] = [
 ];
 
 export const AdminModal: React.FC<AdminModalProps> = ({
-  currentSheetId,
-  currentSheetName,
   certificates,
-  onSaveSheetConfig,
   onRefreshData,
   onClose,
 }) => {
@@ -71,19 +60,8 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Active Admin Tab: 'requests' | 'data' | 'sheet'
-  const [activeTab, setActiveTab] = useState<'requests' | 'data' | 'sheet'>('requests');
-
-  // Sheet Config State
-  const [sheetIdInput, setSheetIdInput] = useState(currentSheetId);
-  const [sheetNameInput, setSheetNameInput] = useState(currentSheetName);
-  const [isTestingSheet, setIsTestingSheet] = useState(false);
-  const [sheetTestResult, setSheetTestResult] = useState<{
-    success: boolean;
-    count?: number;
-    headers?: string[];
-    error?: string;
-  } | null>(null);
+  // Active Admin Tab: 'requests' | 'data' (Sheet configuration tab removed as per request)
+  const [activeTab, setActiveTab] = useState<'requests' | 'data'>('requests');
 
   // Data Management State (Records)
   const [searchFilter, setSearchFilter] = useState('');
@@ -124,36 +102,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
     sessionStorage.removeItem('su_thai_admin_session');
     setUsernameInput('');
     setPasswordInput('');
-  };
-
-  // Test Sheet Connection
-  const handleTestSheet = async () => {
-    setIsTestingSheet(true);
-    setSheetTestResult(null);
-    try {
-      const res = await fetchCertificatesFromSheet(sheetIdInput, sheetNameInput);
-      setSheetTestResult({
-        success: true,
-        count: res.certificates.length,
-        headers: res.headers,
-      });
-    } catch (err: unknown) {
-      setSheetTestResult({
-        success: false,
-        error: err instanceof Error ? err.message : String(err),
-      });
-    } finally {
-      setIsTestingSheet(false);
-    }
-  };
-
-  // Save Sheet Config
-  const handleSaveSheet = () => {
-    onSaveSheetConfig(sheetIdInput.trim(), sheetNameInput.trim());
-    setSheetTestResult({ success: true, count: certificates.length });
-    setTimeout(() => {
-      onRefreshData();
-    }, 300);
   };
 
   // Filtered records in table
@@ -200,7 +148,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
   // Open Create Record
   const openCreate = () => {
     setEditingRecord(null);
-    setFormProject('');
+    setFormProject(certificates[0]?.projectName || '');
     setFormStudentId('');
     setFormName('');
     setFormPdfUrl('');
@@ -261,7 +209,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Quick Apply Corrected Name to Record
   const handleApplyNameToRecord = (req: CorrectionRequest) => {
-    // Find matching certificate by studentId or original name
     const match = certificates.find(
       (c) =>
         (c.studentId && c.studentId === req.studentId) ||
@@ -276,7 +223,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       };
       const filtered = currentCustom.filter((r) => r.id !== match.id);
       saveLocalCustomRecords([...filtered, updatedMatch]);
-      // Update request status to 'เสร็จสิ้น แก้ไขแล้ว'
       const updatedReqs = updateCorrectionRequestStatus(
         req.id,
         'เสร็จสิ้น แก้ไขแล้ว',
@@ -286,7 +232,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
       onRefreshData();
       alert(`อัปเดตชื่อของ ${req.correctedName} ในระบบเรียบร้อยแล้ว`);
     } else {
-      alert('ไม่พบข้อมูลนักศึกษาที่ตรงกับคำร้องนี้ในระบบ กรุณาตรวจสอบหรือเพิ่มรายชื่อใหม่');
+      alert('ไม่พบข้อมูลนักศึกษาที่ตรงกับคำร้องนี้ในระบบ');
     }
   };
 
@@ -401,49 +347,43 @@ export const AdminModal: React.FC<AdminModalProps> = ({
         ) : (
           /* AUTHENTICATED ADMIN DASHBOARD */
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Nav Tabs */}
-            <div className="flex items-center border-b border-purple-100 bg-purple-50/60 px-6 pt-2 overflow-x-auto">
-              {/* Tab 1: คำร้องขอแก้ไขเกียรติบัตร (ชีต2) */}
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold font-prompt border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === 'requests'
-                    ? 'border-purple-800 text-purple-900 bg-white rounded-t-lg'
-                    : 'border-transparent text-stone-600 hover:text-purple-800'
-                }`}
-              >
-                <FileEdit className="w-4 h-4 text-purple-700" />
-                <span>คำร้องขอแก้ไขเกียรติบัตร (ชีต๒)</span>
-                <span className="bg-purple-200 text-purple-900 px-1.5 py-0.2 rounded-full font-mono text-[10px]">
-                  {correctionRequests.length}
-                </span>
-              </button>
+            {/* Nav Tabs (2 focused tabs) */}
+            <div className="flex items-center justify-between border-b border-purple-100 bg-purple-50/60 px-6 pt-2">
+              <div className="flex items-center gap-2">
+                {/* Tab 1: คำร้องขอแก้ไขเกียรติบัตร (ชีต2) */}
+                <button
+                  onClick={() => setActiveTab('requests')}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold font-prompt border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === 'requests'
+                      ? 'border-purple-800 text-purple-900 bg-white rounded-t-lg shadow-xs'
+                      : 'border-transparent text-stone-600 hover:text-purple-800'
+                  }`}
+                >
+                  <FileEdit className="w-4 h-4 text-purple-700" />
+                  <span>คำร้องขอแก้ไขเกียรติบัตร (ชีต๒)</span>
+                  <span className="bg-purple-200 text-purple-900 px-1.5 py-0.2 rounded-full font-mono text-[10px]">
+                    {correctionRequests.length}
+                  </span>
+                </button>
 
-              {/* Tab 2: จัดการข้อมูลเกียรติบัตร */}
-              <button
-                onClick={() => setActiveTab('data')}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold font-prompt border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === 'data'
-                    ? 'border-purple-800 text-purple-900 bg-white rounded-t-lg'
-                    : 'border-transparent text-stone-600 hover:text-purple-800'
-                }`}
-              >
-                <Layers className="w-4 h-4 text-purple-700" />
-                <span>จัดการข้อมูลเกียรติบัตร ({certificates.length} รายการ)</span>
-              </button>
+                {/* Tab 2: จัดการข้อมูลเกียรติบัตร */}
+                <button
+                  onClick={() => setActiveTab('data')}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold font-prompt border-b-2 transition-colors whitespace-nowrap ${
+                    activeTab === 'data'
+                      ? 'border-purple-800 text-purple-900 bg-white rounded-t-lg shadow-xs'
+                      : 'border-transparent text-stone-600 hover:text-purple-800'
+                  }`}
+                >
+                  <Layers className="w-4 h-4 text-purple-700" />
+                  <span>รายชื่อในระบบ ({certificates.length} รายการ)</span>
+                </button>
+              </div>
 
-              {/* Tab 3: ตั้งค่า Google Sheet ID */}
-              <button
-                onClick={() => setActiveTab('sheet')}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-semibold font-prompt border-b-2 transition-colors whitespace-nowrap ${
-                  activeTab === 'sheet'
-                    ? 'border-purple-800 text-purple-900 bg-white rounded-t-lg'
-                    : 'border-transparent text-stone-600 hover:text-purple-800'
-                }`}
-              >
-                <Database className="w-4 h-4 text-purple-700" />
-                <span>ตั้งค่า Google Sheet ID</span>
-              </button>
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-purple-900 font-mono bg-purple-100/70 px-3 py-1 rounded-lg">
+                <Database className="w-3.5 h-3.5 text-purple-700" />
+                <span>Google Sheet ID ถาวร: {PERMANENT_SHEET_ID.slice(0, 8)}...</span>
+              </div>
             </div>
 
             {/* TAB 1: CORRECTION REQUESTS MANAGEMENT (ชีต2) */}
@@ -477,7 +417,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     </select>
                   </div>
 
-                  <div className="text-xs text-stone-500">
+                  <div className="text-xs text-stone-500 font-sarabun">
                     ตารางบันทึกข้อมูล: <strong>ฐานข้อมูล "ชีต๒"</strong>
                   </div>
                 </div>
@@ -528,7 +468,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                                 )}
                               </td>
                               <td className="py-2.5 px-3">
-                                {/* Status Selector */}
                                 <select
                                   value={req.status}
                                   onChange={(e) =>
@@ -593,13 +532,24 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     />
                   </div>
 
-                  <button
-                    onClick={openCreate}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-purple-800 hover:bg-purple-900 rounded-xl transition-all font-prompt shadow-sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>เพิ่มรายชื่อใหม่</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={onRefreshData}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-stone-700 hover:bg-stone-100 rounded-xl transition-colors font-prompt border border-stone-200"
+                      title="ดึงข้อมูลล่าสุดจาก Google Sheet ถาวร"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5 text-stone-600" />
+                      <span>ซิงค์ข้อมูลล่าสุด</span>
+                    </button>
+
+                    <button
+                      onClick={openCreate}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-purple-800 hover:bg-purple-900 rounded-xl transition-all font-prompt shadow-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>เพิ่มรายชื่อใหม่</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="border border-purple-100 rounded-xl overflow-hidden shadow-xs">
@@ -667,89 +617,6 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               </div>
             )}
-
-            {/* TAB 3: SHEET ID CONFIG */}
-            {activeTab === 'sheet' && (
-              <div className="p-6 space-y-6 overflow-y-auto">
-                <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-stone-800 font-prompt">
-                    Google Sheet ID หรือ URL ลิงก์ชีต (ชีต๑ สำหรับรายชื่อเกียรติบัตร)
-                  </label>
-                  <input
-                    type="text"
-                    value={sheetIdInput}
-                    onChange={(e) => {
-                      setSheetIdInput(e.target.value);
-                      setSheetTestResult(null);
-                    }}
-                    placeholder="วาง Sheet ID เช่น 1d9P7u13Xj5l98hWq_E-VbQ... หรือลิงก์ URL"
-                    className="w-full px-4 py-2.5 text-xs bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-purple-600 font-mono text-stone-900"
-                  />
-                  <p className="text-[11px] text-stone-500">
-                    * ต้องเปิดสิทธิ์การแชร์ของชีตเป็น "ทุกคนที่มีลิงก์มีสิทธิ์ดู (Anyone with link can view)"
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-stone-800 font-prompt">
-                    ชื่อแผ่นงาน (Sheet Name) <span className="text-stone-400 font-normal">(เว้นว่างเพื่อใช้หน้าแรก)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={sheetNameInput}
-                    onChange={(e) => setSheetNameInput(e.target.value)}
-                    placeholder="เช่น 'Sheet1' หรือ 'เกียรติบัตร'"
-                    className="w-full px-4 py-2 text-xs bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-stone-900"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleTestSheet}
-                    disabled={isTestingSheet}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-purple-900 bg-purple-100 hover:bg-purple-200 rounded-xl transition-colors font-prompt disabled:opacity-50"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isTestingSheet ? 'animate-spin' : ''}`} />
-                    <span>{isTestingSheet ? 'กำลังทดสอบ...' : 'ทดสอบการเชื่อมต่อ'}</span>
-                  </button>
-
-                  <button
-                    onClick={handleSaveSheet}
-                    className="inline-flex items-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-purple-800 hover:bg-purple-900 rounded-xl transition-colors font-prompt shadow-sm"
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>บันทึกการตั้งค่าชีต</span>
-                  </button>
-                </div>
-
-                {sheetTestResult && (
-                  <div
-                    className={`p-4 rounded-xl border text-xs ${
-                      sheetTestResult.success
-                        ? 'bg-purple-50 border-purple-200 text-purple-950'
-                        : 'bg-rose-50 border-rose-200 text-rose-900'
-                    }`}
-                  >
-                    {sheetTestResult.success ? (
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 font-bold font-prompt text-emerald-700">
-                          <Check className="w-4 h-4" />
-                          <span>เชื่อมต่อสำเร็จ! พบข้อมูล {sheetTestResult.count} รายการ</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-1">
-                        <div className="font-bold font-prompt text-rose-800 flex items-center gap-1.5">
-                          <AlertCircle className="w-4 h-4" />
-                          <span>เชื่อมต่อไม่สำเร็จ</span>
-                        </div>
-                        <p className="text-[11px] text-rose-700">{sheetTestResult.error}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )}
 
@@ -781,7 +648,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     type="text"
                     value={formProject}
                     onChange={(e) => setFormProject(e.target.value)}
-                    placeholder="เช่น โครงการวันภาษาไทยแห่งชาติ"
+                    placeholder="เช่น แรกพี่พบน้อง คล้องสายสัมพันธ์เอกไทย 2569"
                     className="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-stone-900"
                     required
                   />
@@ -795,7 +662,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     type="text"
                     value={formStudentId}
                     onChange={(e) => setFormStudentId(e.target.value)}
-                    placeholder="เช่น 640610123"
+                    placeholder="เช่น 690610001"
                     className="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-stone-900 font-mono"
                   />
                 </div>
@@ -808,7 +675,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     type="text"
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
-                    placeholder="เช่น นายกิตติศักดิ์ รัตนวิเชียร"
+                    placeholder="เช่น นางสาวกมลวรรณ อินศรีทองสงค์"
                     className="w-full px-3 py-2 bg-stone-50 border border-stone-300 rounded-xl focus:ring-2 focus:ring-purple-600 text-stone-900"
                     required
                   />

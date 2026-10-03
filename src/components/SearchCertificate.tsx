@@ -225,24 +225,24 @@ export const SearchCertificate: React.FC<SearchCertificateProps> = ({
                 type="button"
                 onClick={() => {
                   setSearchMode('studentId');
-                  setQueryInput('640610123');
+                  setQueryInput('690610001');
                   setHasSearched(true);
                 }}
                 className="text-purple-800 hover:text-purple-950 font-mono underline"
               >
-                640610123
+                690610001
               </button>
               <span>หรือ</span>
               <button
                 type="button"
                 onClick={() => {
                   setSearchMode('name');
-                  setQueryInput('ชนกนันท์');
+                  setQueryInput('กมลวรรณ');
                   setHasSearched(true);
                 }}
                 className="text-purple-800 hover:text-purple-950 underline"
               >
-                ชนกนันท์
+                กมลวรรณ
               </button>
             </div>
           </div>

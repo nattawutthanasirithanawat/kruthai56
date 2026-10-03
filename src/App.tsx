@@ -2,11 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { CertificateRecord } from './types/certificate';
 import {
   fetchCertificatesFromSheet,
-  getSavedSheetId,
-  saveSheetId,
-  getSavedSheetName,
-  saveSheetName,
-  extractSheetId,
+  PERMANENT_SHEET_ID,
 } from './services/googleSheets';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
@@ -19,44 +15,31 @@ import { CorrectionRequestSection } from './components/CorrectionRequestSection'
 import { Footer } from './components/Footer';
 
 export default function App() {
-  const [sheetId, setSheetId] = useState<string>(getSavedSheetId());
-  const [sheetName, setSheetName] = useState<string>(getSavedSheetName());
   const [certificates, setCertificates] = useState<CertificateRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [activePdfCert, setActivePdfCert] = useState<CertificateRecord | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
 
-  const cleanSheetId = extractSheetId(sheetId);
-
-  const loadData = useCallback(async (id: string, name: string) => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
     try {
-      const res = await fetchCertificatesFromSheet(id, name);
+      // Always load from permanent Google Sheet ID: 1hb2fdnWMIr7-nhlEw8NGYeYYSwmZUfQfLm8gJHqO_Ww
+      const res = await fetchCertificatesFromSheet(PERMANENT_SHEET_ID);
       setCertificates(res.certificates);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setError(msg);
+      console.error('Failed to load certificates from permanent sheet', err);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadData(sheetId, sheetName);
-  }, [sheetId, sheetName, loadData]);
-
-  const handleSaveSheetConfig = (newId: string, newName: string) => {
-    setSheetId(newId);
-    setSheetName(newName);
-    saveSheetId(newId);
-    saveSheetName(newName);
-  };
+    loadData();
+  }, [loadData]);
 
   const handleRefresh = () => {
-    loadData(sheetId, sheetName);
+    loadData();
   };
 
   const handleScrollToSearch = () => {
@@ -82,7 +65,7 @@ export default function App() {
     }
   };
 
-  // Distinct list of project names for correction requests
+  // Distinct list of project names for correction requests & filter
   const availableProjects = useMemo(() => {
     const set = new Set<string>();
     certificates.forEach((c) => {
@@ -95,7 +78,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#faf7fc] text-stone-800 flex flex-col selection:bg-purple-200 selection:text-purple-950 font-sarabun">
-      {/* Top Bar Header - Admin button is strictly only here at top right */}
+      {/* Top Bar Header - Admin button is exclusively at top right */}
       <Header
         onOpenAdmin={() => setIsAdminOpen(true)}
         onOpenGuide={() => setIsGuideOpen(true)}
@@ -135,7 +118,7 @@ export default function App() {
           onSelectProject={handleSelectProjectFromShowcase}
         />
 
-        {/* Requirement 3: Certificate Correction Request System at the bottom */}
+        {/* Certificate Correction Request System at the bottom */}
         <CorrectionRequestSection
           availableProjects={availableProjects}
           onRequestSubmitted={handleRefresh}
@@ -145,7 +128,7 @@ export default function App() {
       {/* Footer */}
       <Footer />
 
-      {/* Requirement 4: PDF Preview Modal with Download button inside */}
+      {/* PDF Preview Modal with Download button inside */}
       {activePdfCert && (
         <PDFViewerModal
           certificate={activePdfCert}
@@ -153,13 +136,10 @@ export default function App() {
         />
       )}
 
-      {/* Requirement 3: Admin Modal (Kruthai56 / kruthai566868) */}
+      {/* Admin Modal (Kruthai56 / kruthai566868) */}
       {isAdminOpen && (
         <AdminModal
-          currentSheetId={sheetId}
-          currentSheetName={sheetName}
           certificates={certificates}
-          onSaveSheetConfig={handleSaveSheetConfig}
           onRefreshData={handleRefresh}
           onClose={() => setIsAdminOpen(false)}
         />
