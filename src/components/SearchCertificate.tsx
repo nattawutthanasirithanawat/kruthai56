@@ -6,10 +6,7 @@ import {
   FolderOpen,
   User,
   ShieldCheck,
-  CheckCircle2,
   AlertCircle,
-  Sparkles,
-  ExternalLink,
 } from 'lucide-react';
 import { CertificateRecord } from '../types/certificate';
 import { formatPdfLink } from '../services/googleSheets';
@@ -136,7 +133,7 @@ export const SearchCertificate: React.FC<SearchCertificateProps> = ({
                     setQueryInput(e.target.value);
                     if (hasSearched) setHasSearched(false);
                   }}
-                  placeholder="กรอกชื่อ หรือ นามสกุล เช่น ครูไทย ทับแก้ว"
+                  placeholder="กรอกชื่อ หรือ นามสกุล"
                   className="w-full pl-10 pr-4 py-2.5 bg-purple-50/40 border border-purple-200 rounded-xl text-stone-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:bg-white transition-all font-sarabun"
                   required
                 />
@@ -144,7 +141,7 @@ export const SearchCertificate: React.FC<SearchCertificateProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons & Quick Sample Chips */}
+          {/* Action Buttons */}
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <div className="flex items-center gap-2">
               <button
@@ -165,8 +162,10 @@ export const SearchCertificate: React.FC<SearchCertificateProps> = ({
                 </button>
               )}
             </div>
-
-
+          </div>
+        </form>
+      </div>
+      
       {/* Loading State */}
       {isLoading && (
         <div className="text-center py-12 bg-white rounded-3xl border border-purple-200 shadow-sm space-y-3">
@@ -207,13 +206,12 @@ export const SearchCertificate: React.FC<SearchCertificateProps> = ({
                             </span>
                           </div>
 
-                          {/* Recipient Name & เลขกำกับเกียรติบัตร (Requirement 2) */}
+                          {/* Recipient Name & เลขกำกับเกียรติบัตร */}
                           <div className="pt-1">
                             <h4 className="text-xl font-bold font-prompt text-purple-950 leading-snug">
                               {cert.name}
                             </h4>
                             <div className="flex items-center gap-2 text-xs text-stone-500 font-mono mt-1.5">
-                              {/* Requirement 2: เปลี่ยนเป็น "เลขที่" */}
                               <span className="font-semibold text-stone-700 font-sarabun">เลขที่:</span>
                               <span className="bg-purple-50 text-purple-900 px-2 py-0.5 rounded font-bold border border-purple-200">
                                 {cert.studentId || 'ไม่ระบุ'}
